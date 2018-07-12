@@ -8,10 +8,12 @@ require 'rscript'
 
 class AlexaSkillResponse
 
-  def initialize(package, debug: false)
+  def initialize(package, debug: false, rsc: nil)
+    
     @rscript = RScript.new(type: 'response', debug: debug)
-    @package, @debug = package, debug
+    @package, @debug, @rsc = package, debug, rsc
     puts '@package: ' + @package.inspect if @debug
+    
   end
 
   def run(h)
@@ -21,12 +23,16 @@ class AlexaSkillResponse
     puts 'id: ' + id.inspect if @debug
 
     code, _, attr = @rscript.read ['//response:' + id, @package]
+    rsc = @rsc if @rsc
     text, mimetype = eval(code)
 
     return out if mimetype == 'application/json'
 
     output text, attr[:attentive]
+    
   end
+  
+  private
 
   def output(s='I hear you', attentive)
 
