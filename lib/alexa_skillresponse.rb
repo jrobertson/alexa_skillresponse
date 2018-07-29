@@ -11,7 +11,7 @@ class AlexaSkillResponse
   def initialize(package, debug: false, rsc: nil, 
                  whitelist: {users: nil, devices: nil})
     
-    @rscript = RScript.new(type: 'response', debug: debug, cache: nil)
+    @rscript = RScript.new(type: 'response', debug: debug)
     @package, @debug, @rsc = package, debug, rsc
     puts '@package: ' + @package.inspect if @debug
     
@@ -19,6 +19,12 @@ class AlexaSkillResponse
     puts '@user_list: ' + @user_list.inspect if @debug
     
   end
+  
+  def reset()
+    @rscript.reset
+  end
+  
+  alias reload reset
 
   def run(h)
     
