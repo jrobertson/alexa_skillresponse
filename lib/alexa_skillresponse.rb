@@ -7,6 +7,7 @@ require 'rscript'
 
 
 class AlexaSkillResponse
+  using ColouredText
 
   def initialize(package, debug: false, rsc: nil, 
                  whitelist: {users: nil, devices: nil})
@@ -15,7 +16,7 @@ class AlexaSkillResponse
     @package, @debug, @rsc = package, debug, rsc
     puts '@package: ' + @package.inspect if @debug
     
-    @user_list, @device_list = whitelist[:users], whitelist[:devices]
+    @users, @devices = whitelist[:users], whitelist[:devices]
     puts '@user_list: ' + @user_list.inspect if @debug
     
   end
@@ -28,32 +29,54 @@ class AlexaSkillResponse
 
   def run(h)
     
-    userid = h[:session][:user][:userId]
-    deviceid = h[:context][:System][:device][:deviceId]
-    puts 'userid: ' + userid.inspect if @debug
+    puts 'inside run: '.info if @debug
 
-    if @user_list and not @user_list.include? userid then
+    userid = h[:session][:user][:userId]
+    puts ('userid: ' + userid.inspect).debug if @debug
+    
+    deviceid = h[:context][:System][:device][:deviceId]
+    puts ('deviceid: ' + userid.inspect).debug if @debug
+
+    if @users and not @users.include? userid then
       return output('Sorry, unauthorized user.') 
+    else
+      user = @users[userid]
+      puts ('user: ' + user.inspect).debug if @debug
     end
     
-    if @device_list and not @device_list.include? deviceid then
+    if @devices and not @devices.include? deviceid then
       return output('Sorry, unauthorized device.') 
-    end    
-    
+    else
+      device = @devices[deviceid]
+      puts ('device: ' + device.inspect).debug if @debug
+    end
+
     req = h[:request]
     
     id = req[:type] == 'IntentRequest' ? req[:intent][:name] : 'welcome'
     puts 'id: ' + id.inspect if @debug
 
     code, _, attr = @rscript.read ['//response:' + id, @package]
-    rsc = @rsc if @rsc
+    
+    if @rsc then
+      
+      rsc = @rsc
+      puts 'rsc found'.info if @debug
+      if rsc.registry and user and device then
+        puts ('sending to the registry').info if @debug
+        rsc.registry.set_key("hkey_apps/alexa/users/" + 
+                user.downcase.gsub(/\W+/,'_') + "/lastsession/device", device)
+      end
+    end
+    
     puts 'code:'  + code.inspect if @debug
     text, mimetype = eval(code)
 
     return out if mimetype == 'application/json'
 
     output text, attentive: attr[:attentive]
-    
+=begin            
+=end   
   end
   
   private
