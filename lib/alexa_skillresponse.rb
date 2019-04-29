@@ -62,7 +62,9 @@ class AlexaSkillResponse
       
       rsc = @rsc
       puts 'rsc found'.info if @debug
+      
       if rsc.registry and user and device then
+
         puts ('sending to the registry').info if @debug
         rsc.registry.set_key("hkey_apps/alexa/users/" + 
                 user.downcase.gsub(/\W+/,'_') + "/lastsession/device", device)
@@ -71,17 +73,41 @@ class AlexaSkillResponse
     
     puts 'code:'  + code.inspect if @debug
     text, mimetype = eval(code)
+    
+    return ssml_output text if text =~ /<speak/
 
-    return out if mimetype == 'application/json'
+    case mimetype
+    when 'application/json'
+      txt_output text
+    when 'application/ssml'
+      ssml_output text
+    else      
+      txt_output text, attentive: attr[:attentive]
+    end
 
-    output text, attentive: attr[:attentive]
-=begin            
-=end   
+      
   end
   
   private
+  
+  def ssml_output(s)
+    
+    h = { 
+      version: "1.0",
+      response: {
+        outputSpeech: {
+          type: "SSML",
+          ssml: ""
+        }
+      }
+    }    
+    
+    h[:response][:outputSpeech][:ssml] = s
+    
+    h
+  end
 
-  def output(s='I hear you', attentive: false)
+  def txt_output(s='I hear you', attentive: false)
 
     h = { 
       version: "1.0",
