@@ -90,6 +90,20 @@ class AlexaSkillResponse
   
   private
   
+  def output(s)
+
+    h = { 
+      version: "1.0",
+      response: {
+        outputSpeech: {
+          type: "PlainText",
+          text: "#{s}"
+        }
+      }
+    }
+    
+  end
+  
   def ssml_output(s)
     
     h = { 
