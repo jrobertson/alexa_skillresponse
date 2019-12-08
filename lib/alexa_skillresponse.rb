@@ -141,3 +141,29 @@ class AlexaSkillResponse
   end
 
 end
+
+class AlexaSkillResponseCollection
+  
+  def initialize(skills={}, debug: false, rsc: nil, 
+                 whitelist: {users: nil, devices: nil})
+    
+    @debug = debug
+    @skills = skills.inject({}) do |r, x|
+      
+      package_name, rsf_package = x
+      asr = AlexaSkillResponse.new(rsf_package, debug: debug, rsc: rsc, 
+                                   whitelist: whitelist)
+      r.merge(package_name => asr)
+          
+    end
+    
+  end
+  
+  def run(h)
+    
+    puts '@skills: ' + @skills.inspect if @debug
+    @skills[h[:skill]].run h
+
+  end
+  
+end
