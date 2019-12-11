@@ -159,10 +159,11 @@ class AlexaSkillResponseCollection
     
   end
   
-  def run(h)
+  def run(skill, h)
     
+    puts 'skill: ' + skill.inspect if @debug
     puts '@skills: ' + @skills.inspect if @debug
-    @skills[h[:skill]].run h
+    @skills[skill].run h
 
   end
   
