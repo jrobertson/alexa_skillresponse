@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'alexa_skillresponse'
-  s.version = '0.2.1'
+  s.version = '0.2.2'
   s.summary = 'Responds to an Alexa Skill request using Ruby scripts ' + 
       'embedded in a kind of XML format'
   s.authors = ['James Robertson']

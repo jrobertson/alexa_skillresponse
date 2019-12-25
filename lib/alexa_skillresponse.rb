@@ -64,10 +64,15 @@ class AlexaSkillResponse
       puts 'rsc found'.info if @debug
       
       if rsc.registry and user and device then
+        
+        e = rsc.registry.get_key 'hkey_apps/alexa/accounts'
+        euserid = e.xpath('*/id').find {|x| x.text.to_s == userid}        
 
-        puts ('sending to the registry').info if @debug
-        rsc.registry.set_key("hkey_apps/alexa/users/" + 
-                user.downcase.gsub(/\W+/,'_') + "/lastsession/device", device)
+        if euserid then
+          puts ('sending to the registry').info if @debug
+          rsc.registry.set_key("hkey_apps/alexa/accounts/" + 
+                  euserid.parent.name + "/lastsession/device", device)
+        end
       end
     end
     
